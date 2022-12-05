@@ -62,3 +62,13 @@ pytest --testdox -vvs tests/tarefas/t1/
 ```python
 pytest --testdox -vvs tests/tarefas/t2/
 ```
+
+- Rodando testes da Tarefa 3:
+```python
+pytest --testdox -vvs tests/tarefas/t3/
+```
+
+- Rodando testes da Tarefa 4:
+```python
+pytest --testdox -vvs tests/tarefas/t4/
+```
