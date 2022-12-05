@@ -5,18 +5,19 @@ from rest_framework_simplejwt.tokens import RefreshToken
 User: AbstractUser = get_user_model()
 
 
-def create_employee_with_token() -> tuple[AbstractUser, RefreshToken]:
-    employee_data = {
-        "username": "lucira_buster",
-        "email": "lucira_buster@kenziebuster.com",
-        "birthdate": "1999-09-09",
-        "first_name": "Lucira",
-        "last_name": "Buster",
-        "password": "1234",
-        "is_employee": True,
-    }
+def create_employee_with_token(employee_data=None) -> tuple[AbstractUser, RefreshToken]:
+    if not employee_data:
+        employee_data = {
+            "username": "lucira_buster",
+            "email": "lucira_buster@kenziebuster.com",
+            "birthdate": "1999-09-09",
+            "first_name": "Lucira",
+            "last_name": "Buster",
+            "password": "1234",
+            "is_employee": True,
+        }
 
-    employee = User.objects.create_user(**employee_data)
+    employee = User.objects.create_superuser(**employee_data)
     employee_token = RefreshToken.for_user(employee)
 
     return employee, employee_token
