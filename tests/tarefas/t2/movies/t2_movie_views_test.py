@@ -1,6 +1,5 @@
 from rest_framework.test import APITestCase
 from rest_framework.views import status
-import ipdb
 from movies.models import Movie
 from rest_framework_simplejwt.tokens import RefreshToken
 from tests.factories import (

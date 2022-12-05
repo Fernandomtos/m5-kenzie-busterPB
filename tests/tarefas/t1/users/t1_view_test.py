@@ -3,7 +3,6 @@ from rest_framework.test import APITestCase
 from rest_framework.views import status
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, AbstractUser
-import ipdb
 from unittest.mock import patch, MagicMock
 
 # from users.models import User
