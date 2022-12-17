@@ -31,7 +31,7 @@ class UserViewsT4Test(APITestCase):
         resulted_status_code = response.status_code
 
         msg = (
-            "Verifique se o status code retornado do POST sem token "
+            "Verifique se o status code retornado do GET sem token "
             + f"em `{base_url}` é {expected_status_code}"
         )
         self.assertEqual(expected_status_code, resulted_status_code, msg)
