@@ -20,7 +20,7 @@ class MovieViewsT2Test(APITestCase):
 
     def test_movies_listing(self):
         employee, _ = create_employee_with_token()
-        movies_count = 5
+        movies_count = 4
         create_multiple_movies_with_employee(employee, movies_count)
 
         response = self.client.get(self.BASE_URL)
