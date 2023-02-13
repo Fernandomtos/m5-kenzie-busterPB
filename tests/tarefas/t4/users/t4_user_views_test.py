@@ -22,7 +22,7 @@ class UserViewsT4Test(APITestCase):
         # UnitTest Longer Logs
         cls.maxDiff = None
 
-    def test_get_user_info_without_token(self):
+    def test_if_cannot_get_user_info_without_token(self):
         base_url = self.BASE_URL % self.employee.id
         response = self.client.get(base_url)
 
@@ -31,7 +31,7 @@ class UserViewsT4Test(APITestCase):
         resulted_status_code = response.status_code
 
         msg = (
-            "Verifique se o status code retornado do GET sem token "
+            f"Verifique se o status code retornado do {response.request['REQUEST_METHOD']} sem token "
             + f"em `{base_url}` é {expected_status_code}"
         )
         self.assertEqual(expected_status_code, resulted_status_code, msg)
@@ -46,7 +46,7 @@ class UserViewsT4Test(APITestCase):
         expected_status_code = status.HTTP_200_OK
         returned_status_code = response.status_code
         msg = (
-            "Verifique se o status code retornado do GET "
+            f"Verifique se o status code retornado do {response.request['REQUEST_METHOD']} "
             + f"em `{base_url}` é {expected_status_code}"
         )
         self.assertEqual(expected_status_code, returned_status_code, msg)
@@ -64,13 +64,13 @@ class UserViewsT4Test(APITestCase):
         }
         returned_keys = set(response.json().keys())
         msg = (
-            "Verifique se as chaves corretas estão sendo retornadas em "
+            f"Verifique se as chaves corretas estão sendo retornadas do {response.request['REQUEST_METHOD']} em "
             + f"em `{base_url}`"
         )
 
         self.assertSetEqual(expected_keys, returned_keys, msg)
 
-    def test_if_a_non_employee_user_can_get_another_user_profile_info(self):
+    def test_if_a_non_employee_user_cannot_get_another_user_profile_info(self):
         base_url = self.BASE_URL % self.employee.id
         non_employee_token = str(self.non_employee_token.access_token)
         # STATUS CODE
@@ -80,7 +80,7 @@ class UserViewsT4Test(APITestCase):
         expected_status_code = status.HTTP_403_FORBIDDEN
         returned_status_code = response.status_code
         msg = (
-            "Verifique se o status code retornado do GET com token não employee e não dono da conta "
+            f"Verifique se o status code retornado do {response.request['REQUEST_METHOD']} com token não employee e não dono da conta "
             + f"em `{base_url}` é {expected_status_code}"
         )
         self.assertEqual(expected_status_code, returned_status_code, msg)
@@ -95,7 +95,7 @@ class UserViewsT4Test(APITestCase):
         expected_status_code = status.HTTP_200_OK
         returned_status_code = response.status_code
         msg = (
-            "Verifique se o status code retornado do GET "
+            f"Verifique se o status code retornado do {response.request['REQUEST_METHOD']} "
             + f"em `{base_url}` é {expected_status_code}"
         )
         self.assertEqual(expected_status_code, returned_status_code, msg)
@@ -113,8 +113,126 @@ class UserViewsT4Test(APITestCase):
         }
         returned_keys = set(response.json().keys())
         msg = (
-            "Verifique se as chaves corretas estão sendo retornadas em "
+            f"Verifique se as chaves corretas estão sendo retornadas do {response.request['REQUEST_METHOD']} em "
             + f"em `{base_url}`"
         )
 
         self.assertSetEqual(expected_keys, returned_keys, msg)
+
+    def test_if_cannot_update_user_info_without_token(self):
+        base_url = self.BASE_URL % self.employee.id
+        response = self.client.patch(base_url, data={}, format="json")
+        # import ipdb
+
+        # ipdb.set_trace()
+        # STATUS CODE
+        expected_status_code = status.HTTP_401_UNAUTHORIZED
+        resulted_status_code = response.status_code
+
+        msg = (
+            f"Verifique se o status code retornado do {response.request['REQUEST_METHOD']} sem token "
+            + f"em `{base_url}` é {expected_status_code}"
+        )
+        self.assertEqual(expected_status_code, resulted_status_code, msg)
+
+    def test_if_a_non_employee_user_cannot_update_another_user_profile_info(self):
+        base_url = self.BASE_URL % self.employee.id
+        non_employee_token = str(self.non_employee_token.access_token)
+
+        # STATUS CODE
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + non_employee_token)
+        response = self.client.patch(base_url, data={}, format="json")
+
+        expected_status_code = status.HTTP_403_FORBIDDEN
+        returned_status_code = response.status_code
+        msg = (
+            f"Verifique se o status code retornado do {response.request['REQUEST_METHOD']} com token não employee e não dono da conta "
+            + f"em `{base_url}` é {expected_status_code}"
+        )
+        self.assertEqual(expected_status_code, returned_status_code, msg)
+
+    def test_if_a_non_employee_user_can_update_own_profile_info(self):
+        base_url = self.BASE_URL % self.non_employee.id
+        non_employee_token = str(self.non_employee_token.access_token)
+        user_data = {"username": "non_employee_patch", "password": "new_password"}
+
+        # STATUS CODE
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + non_employee_token)
+        response = self.client.patch(base_url, data=user_data, format="json")
+
+        expected_status_code = status.HTTP_200_OK
+        returned_status_code = response.status_code
+        msg = (
+            f"Verifique se o status code retornado do {response.request['REQUEST_METHOD']} "
+            + f"em `{base_url}` é {expected_status_code}"
+        )
+        self.assertEqual(expected_status_code, returned_status_code, msg)
+
+        # RETORNO JSON
+        expected_keys = {
+            "id",
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "birthdate",
+            "is_employee",
+            "is_superuser",
+        }
+        returned_keys = set(response.json().keys())
+        msg = (
+            f"Verifique se as chaves corretas estão sendo retornadas do {response.request['REQUEST_METHOD']} em "
+            + f"em `{base_url}`"
+        )
+
+        self.assertSetEqual(expected_keys, returned_keys, msg)
+
+        user = User.objects.last()
+        msg = (
+            f"Verifique se a senha está sendo atualizada no {response.request['REQUEST_METHOD']} em "
+            + f"em `{base_url}`"
+        )
+        self.assertTrue(user.check_password(user_data["password"]), msg)
+
+    def test_if_a_employee_user_can_update_another_user_profile_info(self):
+        base_url = self.BASE_URL % self.non_employee.id
+        employee_token = str(self.employee_token.access_token)
+        user_data = {"username": "employee_patch", "password": "new_password"}
+
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + employee_token)
+        response = self.client.patch(base_url, data=user_data, format="json")
+
+        # STATUS CODE
+        expected_status_code = status.HTTP_200_OK
+        returned_status_code = response.status_code
+        msg = (
+            f"Verifique se o status code retornado do {response.request['REQUEST_METHOD']} "
+            + f"em `{base_url}` é {expected_status_code}"
+        )
+        self.assertEqual(expected_status_code, returned_status_code, msg)
+
+        # RETORNO JSON
+        expected_keys = {
+            "id",
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "birthdate",
+            "is_employee",
+            "is_superuser",
+        }
+        returned_keys = set(response.json().keys())
+        msg = (
+            f"Verifique se as chaves corretas estão sendo retornadas do {response.request['REQUEST_METHOD']} em "
+            + f"em `{base_url}`"
+        )
+
+        self.assertSetEqual(expected_keys, returned_keys, msg)
+
+        user = User.objects.last()
+        msg = (
+            f"Verifique se a senha está sendo atualizada no {response.request['REQUEST_METHOD']} em "
+            + f"em `{base_url}`"
+        )
+        self.assertTrue(user.check_password(user_data["password"]), msg)
