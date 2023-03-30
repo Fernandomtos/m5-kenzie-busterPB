@@ -33,6 +33,9 @@ source venv/bin/activate
 
 # windows:
 .\venv\Scripts\activate
+
+# git bash:
+source venv/Scripts/activate
 ```
 
 3. Instale o pacote `pytest-testdox`:
