@@ -31,6 +31,40 @@ class MovieViewsT2Test(APITestCase):
         msg = "Verifique se todos os filmes estão sendo retornados corretamente"
         self.assertEqual(expected_count, resulted_count, msg)
 
+    def test_get_movie_by_id(self):
+        employee, _ = create_employee_with_token()
+
+        # Criando movie 1
+        movie_data = {"title": "Frozen", "duration": "102min"}
+        create_movie_with_employee(movie_data, employee)
+
+        response = self.client.get(self.BASE_DETAIL_URL)
+
+        expected_status_code = status.HTTP_200_OK
+        result_status_code = response.status_code
+        msg = (
+            "Verifique se o status code retornado do GET "
+            + f"em `{self.BASE_DETAIL_URL}` é {expected_status_code}"
+        )
+        self.assertEqual(expected_status_code, result_status_code, msg)
+
+        # RESPONSE JSON
+        expected_data = {
+            **movie_data,
+            **{
+                "id": 1,
+                "added_by": f"{employee.email}",
+                "rating": "G",
+                "synopsis": None,
+            },
+        }
+        resulted_data = response.json()
+        msg = (
+            "Verifique as informações do filme retornadas no POST "
+            + f"em `{self.BASE_URL}` estão corretas."
+        )
+        self.assertEqual(expected_data, resulted_data, msg)
+
     def test_movie_creation_without_token(self):
         movie_data = {
             "title": "Frozen",
@@ -79,7 +113,7 @@ class MovieViewsT2Test(APITestCase):
         }
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + employee_token)
         response = self.client.post(self.BASE_URL, data=movie_data, format="json")
-
+        
         # STATUS CODE
         expected_status_code = status.HTTP_201_CREATED
         resulted_status_code = response.status_code
