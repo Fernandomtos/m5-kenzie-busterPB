@@ -35,3 +35,8 @@ class UserSerializer(serializers.Serializer):
             return User.objects.create_superuser(**validated_data)
 
         return User.objects.create_user(**validated_data)
+
+
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=50, write_only=True)
+    password = serializers.CharField(write_only=True)
